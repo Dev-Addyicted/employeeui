@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Card, CardContent } from "@mui/material";
+import { Grid, Card, CardContent, Button } from "@mui/material";
 import axios from "axios";
 import { EmpItem } from "./EmpItem";
-export const EmpList = () => {
+import { useNavigate } from "react-router-dom";
+
+export const EmpList = ({ handleUpdate }) => {
     const [data, setData] = useState([]);
+    const [pagi, setPagi] = useState(4);
+    const navigate = useNavigate()
 
     const getApi = async () => {
         const result = await axios.get("http://localhost:2888/empall");
@@ -12,6 +16,23 @@ export const EmpList = () => {
     useEffect(() => {
         getApi();
     }, []);
+
+    const handlePrevious = () => {
+        if (pagi > 5) {
+            setPagi(pagi - 4);
+
+        }
+    }
+
+    const handleNext = () => {
+        if (pagi < data.length) {
+
+            setPagi(pagi + 4)
+        }
+    }
+
+
+
     return (
         <Grid container spacing={2} align="center">
             <Grid item xs={12}>
@@ -39,17 +60,28 @@ export const EmpList = () => {
                             </Grid>
                             <Grid item xs={1}></Grid>
                         </Grid>
-                        {data.map((item) => (
+                        {data.slice(pagi - 4, pagi).map((item) => (
                             <Grid item xs={12}>
                                 <Card>
                                     <CardContent>
-                                        <EmpItem item={item} />
+                                        <EmpItem handleUpdate={handleUpdate} item={item} />
                                     </CardContent>
                                 </Card>
                             </Grid>
                         ))}
                     </CardContent>
                 </Card>
+            </Grid>
+            <Grid item xs={2}>
+                <Button sx={{ display: pagi <= 4 } ? "none" : "block"} variant="contained" fullWidth onClick={() => handlePrevious()} >Previous</Button>
+            </Grid>
+            <Grid item xs={2}></Grid>
+            <Grid item xs={4}>
+                <Button variant="contained" fullWidth color="secondary" onClick={() => navigate("/dashboard", { state: data })} >Dashboard</Button>
+            </Grid>
+            <Grid item xs={2}></Grid>
+            <Grid item xs={2}>
+                <Button sx={{ display: pagi >= data.length } ? "none" : "block"} variant="contained" fullWidth onClick={() => handleNext()} >Next</Button>
             </Grid>
         </Grid>
     );
